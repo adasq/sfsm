@@ -1,0 +1,9 @@
+{
+	"crypto": {
+			"algorithm": "aes-256-ctr",
+			"password": "*****"
+	},
+	"storage": {
+		"google_drive": "oAuth2 json (google api)"
+	}
+}
