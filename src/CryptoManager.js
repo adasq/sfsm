@@ -25,17 +25,15 @@ module.exports = {
 };
 
 function encrypt(){	
-	return bun([zip, encryptStream]);
+	return bun([zlib.createGzip(), crypto.createCipher(config.algorithm, config.password)]);
 }
 
 function decrypt(){
-	return bun([decryptStream, unzip]);
+	return bun([crypto.createDecipher(config.algorithm, config.password), zlib.createGunzip()]);
 }
 
 function init(_config){
 	if(_config && _.isObject(_config)){
 		config = _.extend(config, _config);
 	}
-	encryptStream = crypto.createCipher(config.algorithm, config.password);
-	decryptStream = crypto.createDecipher(config.algorithm, config.password);
 }

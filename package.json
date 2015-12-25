@@ -21,6 +21,7 @@
   "dependencies": {
     "chokidar": "^1.2.0",
     "google-auth-library": "^0.9.6",
-    "nconf": "^0.8.2"
+    "nconf": "^0.8.2",
+    "utf8": "^2.1.1"
   }
 }
