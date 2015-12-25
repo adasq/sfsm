@@ -20,7 +20,7 @@ nconf
 .file({ file: 'config.json' });
 
 var dropbox = new Dropbox({
-    "token": "F5BjyJCeHMAAAAAAAAAK2yRQ5HqKQv1C_Ne0FovdEohAdKpfXc7jOucjVTZxGNOu"
+    "token": nconf.get('dropbox_token')
 });
 
 CryptoManager.init(nconf.get('crypto'));
