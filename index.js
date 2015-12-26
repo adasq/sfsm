@@ -2,15 +2,18 @@
 var fs = require('fs');
 var _ = require('underscore');
 var chokidar = require('chokidar');
+var EventEmitter = require('events');
 var zlib = require('zlib');
 var crypto = require('crypto');
 var through2 = require('through2');
 var nconf = require('nconf');
 var path = require('path');
+var util = require('util');
 
 var CryptoManager = require('./src/CryptoManager');
 var Dropbox = require('./src/Dropbox');
 var DirStorageService = require('./src/DirStorageService');
+var DropboxStorageService = require('./src/DropboxStorageService');
 var GoogleDriveManager = require('./src/GoogleDriveManager');
 
 //--------------------------------------------------------------------------------------------
@@ -19,15 +22,12 @@ nconf
 .env()
 .file({ file: 'config.json' });
 
-var dropbox = new Dropbox({
-    "token": nconf.get('dropbox_token')
-});
 
 CryptoManager.init(nconf.get('crypto'));
-
+process.setMaxListeners(0);
 
 const PLAIN_DIR_PATH = 'D:/sfsm-tests/plain' || path.join(__dirname, 'fotos-plain');
-const ENC_DIR_PATH = 'D:/sfsm-tests/encrypted' || path.join(__dirname, 'fotos-enc');
+const ENC_DIR_PATH = 'C:/Users/adasq/Dropbox/PHOTOS-ENC' || 'D:/sfsm-tests/encrypted' || path.join(__dirname, 'fotos-enc');
 
 var common = {
   prepareEncryptedName: function(plainFileName){
@@ -41,6 +41,44 @@ var common = {
 };
 
 //----------------------------------------------------------------------------------------
+
+
+
+// dropbox.downloadFile('/1450599864114.jpg')
+// .then(function(r){
+//   console.log('success', r.headers);
+//   r.pipe(fs.createWriteStream('WWWWWWWWWWWWWW.jpg'))
+// }, function(err){
+//   console.log(err);
+// });
+
+
+
+//------------------------------------------------------
+// var db = new DropboxStorageService({
+//   token: nconf.get('dropbox_token')
+// });
+
+
+//fs.createReadStream('D:/sfsm-tests/image1.jpg').pipe(db.saveFile('aaa4.jpg'));
+  
+// db.fileExists('aaa2.jpg', function(exists){
+//   console.log(exists);
+// });
+
+// db.removeFile('aaa2.jpg', function(err){
+//   console.log(err);
+// });
+
+//db.downloadFile('aaaa.jpg').pipe(fs.createWriteStream('test.jpg'));
+
+// dropbox.getMetadata('1450599864114 - Kopia (3).jpg')
+// .then(function(result){
+//   console.log(result);
+// }, function(err){
+//   console.log('err',err);
+// })
+
 
 var plainStorageService = new DirStorageService({dirName: PLAIN_DIR_PATH});
 var encryptedStorageService = new DirStorageService({dirName: ENC_DIR_PATH});

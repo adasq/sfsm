@@ -5,10 +5,10 @@ var utf8 = require('utf8');
 
 
 var urls = {
-  DELETE_FILE_URL: 'https://api.dropbox.com/1/fileops/delete',
+  DELETE_FILE_URL: 'https://api.dropboxapi.com/2/files/delete',
   FILE_PUT_URL: 'https://api-content.dropbox.com/1/files_put/auto/',
   GET_FILES_LIST: 'https://api.dropbox.com/1/metadata/auto',
-  GET_FILE: 'https://api-content.dropbox.com/1/files/auto',
+  GET_FILE: 'https://content.dropboxapi.com/2/files/download',
   GET_METADATA: 'https://api.dropboxapi.com/2/files/get_metadata'
 };
 
@@ -25,68 +25,58 @@ DropboxAPI.prototype.configure = function(config){
   };
 };
  
-DropboxAPI.prototype.downloadFile = function(path){
-  var qs = {}; 
-  console.log(utf8.encode(path));
-  var url = urls.GET_FILE +utf8.encode(path);
-  var deferred = q.defer();
-
-  request.get({headers: this.config.headers, url: url, qs:qs, json:true}, function(e,response,data){
+DropboxAPI.prototype.downloadFile = function(fileName){
+  
+  var headers = _.extend({"Dropbox-API-Arg": JSON.stringify({path: '/'+utf8.encode(fileName)})}, this.config.headers);
+  console.log(headers);
+  return request({
+    method: 'POST',
+    headers: headers, 
+    uri: urls.GET_FILE,
+    json:true}, function(e,response,data){
     if(response.headers['content-type'] === 'application/json'){
-      return deferred.reject(data);
+    
     }
   })
   .on('response', function(response){
     if(response.headers['content-type'] !== 'application/json'){
-      return deferred.resolve(response);
+    
     }
   });
-  return deferred.promise;
 };
 
 DropboxAPI.prototype.removeFile= function(fileName){
 
   var deferred = q.defer();
-  var callback = function(error, response, body){
-       var obj = null;
-    try{
-      obj = JSON.parse(body);
-      if(obj.error){
-        deferred.reject(obj.error);
+  var callback = function(error, response, obj){
+  if(error || _.isString(obj)){
+        deferred.reject(obj);
       }else{
         deferred.resolve(obj);
-      }      
-    }catch(e){
-      deferred.reject(body);
-    }
+      }  
   }; 
   var url = urls.DELETE_FILE_URL;
   
-var targetRequest = request.post({
+var targetRequest = request({
+  method: 'POST',
   uri: url,
-  form: {
-    root: 'auto',
+  body: {
     path: '/'+fileName
   },
+  json: true,
   followRedirect: false, 
   headers: this.config.headers}, callback);
   return deferred.promise;
-}
+};
 
 DropboxAPI.prototype.getMetadata= function(fileName){
   var deferred = q.defer();
-  var callback = function(error, response, body){
-       var obj = null;
-    try{
-      obj = JSON.parse(body);
-      if(obj.error){
-        deferred.reject(obj.error);
+  var callback = function(error, response, obj){
+      if(error || _.isString(obj) || obj.error){
+        deferred.reject(obj.error || obj);
       }else{
         deferred.resolve(obj);
-      }      
-    }catch(e){
-      deferred.reject(body);
-    }
+      }  
   }; 
 
 var targetRequest = request({
@@ -101,9 +91,6 @@ var targetRequest = request({
   headers: this.config.headers}, callback);
   return deferred.promise;
 }
-
-
-
 
 
 
@@ -141,6 +128,19 @@ var targetRequest = request.post({
   file.stream.pipe(targetRequest);
 
   return deferred.promise;
+};
+
+
+DropboxAPI.prototype.uploadFile2= function(fileName){
+
+  var uploadUrl = urls.FILE_PUT_URL+ (fileName);
+  
+var targetRequest = request.post({
+  uri: uploadUrl,
+  followRedirect: false, 
+  headers: this.config.headers}, function(){console.log('ok:P')});
+
+  return targetRequest;
 };
 
 
