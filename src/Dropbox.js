@@ -9,7 +9,9 @@ var urls = {
   FILE_PUT_URL: 'https://api-content.dropbox.com/1/files_put/auto/',
   GET_FILES_LIST: 'https://api.dropbox.com/1/metadata/auto',
   GET_FILE: 'https://content.dropboxapi.com/2/files/download',
-  GET_METADATA: 'https://api.dropboxapi.com/2/files/get_metadata'
+  GET_METADATA: 'https://api.dropboxapi.com/2/files/get_metadata',
+  LIST_FOLDER: 'https://api.dropboxapi.com/2/files/list_folder',
+  LONGPOLL: 'https://notify.dropboxapi.com/2/files/list_folder/longpoll'
 };
 
 var DropboxAPI = function(config){
@@ -24,7 +26,54 @@ DropboxAPI.prototype.configure = function(config){
     "Authorization":"Bearer "+config.token,
   };
 };
- 
+
+DropboxAPI.prototype.listFolder= function(path){
+
+  var deferred = q.defer();
+  var callback = function(error, response, obj){
+  if(error || _.isString(obj)){
+        deferred.reject(obj);
+      }else{
+        deferred.resolve(obj);
+      }  
+  };  
+  
+var targetRequest = request({
+  method: 'POST',
+  uri: urls.LIST_FOLDER,
+  body: {
+    path: path
+  },
+  json: true,
+  followRedirect: false, 
+  headers: this.config.headers}, callback);
+  return deferred.promise;
+};
+
+DropboxAPI.prototype.longpoll= function(cursor){
+
+  var deferred = q.defer();
+  var callback = function(error, response, obj){
+  if(error || _.isString(obj)){
+        deferred.reject(obj);
+      }else{
+        deferred.resolve(obj);
+      }  
+  };  
+  
+var targetRequest = request({
+  method: 'POST',
+  uri: urls.LONGPOLL,
+  body: {
+    cursor: cursor,
+    timeout: 30
+  },
+  json: true,
+  followRedirect: false, 
+  headers: {} || this.config.headers}, callback);
+  return deferred.promise;
+};
+
 DropboxAPI.prototype.downloadFile = function(fileName){
   
   var headers = _.extend({"Dropbox-API-Arg": JSON.stringify({path: '/'+utf8.encode(fileName)})}, this.config.headers);

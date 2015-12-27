@@ -55,10 +55,18 @@ var common = {
 
 
 //------------------------------------------------------
-// var db = new DropboxStorageService({
-//   token: nconf.get('dropbox_token')
-// });
+var db = new DropboxStorageService({
+  token: nconf.get('dropbox_token')
+});
 
+db.dropbox.listFolder('').then(function(result){
+  console.log(result.cursor);
+  db.dropbox.longpoll(result.cursor).then(function(changes){
+    console.log(changes);
+  }, function(err){
+    console.log(err);
+  });
+})
 
 //fs.createReadStream('D:/sfsm-tests/image1.jpg').pipe(db.saveFile('aaa4.jpg'));
   
@@ -79,6 +87,9 @@ var common = {
 //   console.log('err',err);
 // })
 
+
+
+return;
 
 var plainStorageService = new DirStorageService({dirName: PLAIN_DIR_PATH});
 var encryptedStorageService = new DirStorageService({dirName: ENC_DIR_PATH});
