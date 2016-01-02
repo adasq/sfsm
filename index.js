@@ -59,14 +59,15 @@ var db = new DropboxStorageService({
   token: nconf.get('dropbox_token')
 });
 
-db.dropbox.listFolder('').then(function(result){
-  console.log(result.cursor);
-  db.dropbox.longpoll(result.cursor).then(function(changes){
-    console.log(changes);
-  }, function(err){
-    console.log(err);
-  });
-})
+db.watch();
+
+db.on('file-added', function(file){
+  console.log('file-added', file.name);
+});
+
+db.on('file-removed', function(file){
+  console.log('file-removed', file.name);
+});
 
 //fs.createReadStream('D:/sfsm-tests/image1.jpg').pipe(db.saveFile('aaa4.jpg'));
   

@@ -25,6 +25,32 @@ DropboxStorageService.prototype.downloadFile = function(fileName){
 };
 
 
+DropboxStorageService.prototype.watch = function(){
+  var that = this;
+  var cursor = null;
+
+  function emitChanges(entries){
+    console.log(entries);
+  }
+
+  that.dropbox.listFolder('').then(function(result){
+  result.entries
+  cursor = result.cursor;
+  setInterval(function(){
+    that.dropbox.listFolderContinue(cursor).then(function(changes){
+      emitChanges(changes.entries);
+      cursor = changes.cursor;
+    }, function(err){
+      console.log(err);
+    });
+  }, 4000);
+
+
+})
+
+
+};
+
 DropboxStorageService.prototype.fileExists = function(fileName, cb){
   this.dropbox.getMetadata(fileName)
   .then(function(result){

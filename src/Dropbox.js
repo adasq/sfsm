@@ -11,7 +11,7 @@ var urls = {
   GET_FILE: 'https://content.dropboxapi.com/2/files/download',
   GET_METADATA: 'https://api.dropboxapi.com/2/files/get_metadata',
   LIST_FOLDER: 'https://api.dropboxapi.com/2/files/list_folder',
-  LONGPOLL: 'https://notify.dropboxapi.com/2/files/list_folder/longpoll'
+  LIST_FOLDER_CONTINUE: 'https://api.dropboxapi.com/2/files/list_folder/continue'
 };
 
 var DropboxAPI = function(config){
@@ -50,7 +50,7 @@ var targetRequest = request({
   return deferred.promise;
 };
 
-DropboxAPI.prototype.longpoll= function(cursor){
+DropboxAPI.prototype.listFolderContinue= function(cursor){
 
   var deferred = q.defer();
   var callback = function(error, response, obj){
@@ -63,14 +63,13 @@ DropboxAPI.prototype.longpoll= function(cursor){
   
 var targetRequest = request({
   method: 'POST',
-  uri: urls.LONGPOLL,
+  uri: urls.LIST_FOLDER_CONTINUE,
   body: {
-    cursor: cursor,
-    timeout: 30
+    cursor: cursor
   },
   json: true,
   followRedirect: false, 
-  headers: {} || this.config.headers}, callback);
+  headers: this.config.headers}, callback);
   return deferred.promise;
 };
 
